@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varian Email Generator - HALAL CENTER AL-FALAH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.mini.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'halal-green': '#16a34a',
+                        'halal-dark': '#15803d',
+                        'halal-light': '#22c55e'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hexagon {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-3">
+                    <!-- Logo -->
+                    <div class="w-16 h-16 flex items-center justify-center bg-white rounded-lg">
+                        <img src="./static/logo_client.png" alt="HALAL CENTER AL-FALAH"
+                            class="w-14 h-14 object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-gray-900">HALAL CENTER</h1>
+                        <p class="text-sm text-halal-green font-medium">AL-FALAH</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Varian Email Generator</p>
+                    <p class="text-xs text-gray-500">Static v1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <div class="w-32 h-32 mx-auto mb-6 flex items-center justify-center bg-white rounded-xl shadow-lg">
+                <img src="./static/logo_client.png" alt="HALAL CENTER AL-FALAH" class="w-28 h-28 object-contain">
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                Generate Email Varian
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Buat variasi email dengan menambahkan titik di username
+            </p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
+            <form id="emailForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                    </label>
+                    <div class="relative">
+                        <input type="email" id="email" name="email"
+                            placeholder="Masukkan email (contoh: alfalah@gmail.com)"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-halal-green focus:border-halal-green transition-colors"
+                            required>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Realtime Calculation Display -->
+                    <div id="realtimeCalculation" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                        style="display: none;">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                <span class="text-sm font-medium text-blue-700">Kombinasi yang mungkin:</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span id="combinationCount" class="text-lg font-bold text-blue-600">0</span>
+                                <span class="text-xs text-blue-500">email</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning for Large Combinations -->
+                    <div id="largeCombinationWarning" class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                        style="display: none;">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+                                </path>
+                            </svg>
+                            <div class="text-sm text-yellow-700">
+                                <p class="font-medium">Perhatian!</p>
+                                <p class="mt-1">Jumlah kombinasi sangat besar. Generate mungkin memakan waktu lama dan
+                                    dapat membebani browser.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning for Too Long Username -->
+                    <div id="tooLongWarning" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg"
+                        style="display: none;">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+                                </path>
+                            </svg>
+                            <div class="text-sm text-red-700">
+                                <p class="font-medium">Username Terlalu Panjang!</p>
+                                <p class="mt-1">Maksimal 21 karakter untuk menghindari kombinasi yang terlalu besar dan
+                                    membebani sistem.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning for Excel Download Limit -->
+                    <div id="excelLimitWarning" class="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg"
+                        style="display: none;">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+                                </path>
+                            </svg>
+                            <div class="text-sm text-orange-700">
+                                <p class="font-medium">Excel Download Terbatas!</p>
+                                <p class="mt-1">Username lebih dari 20 karakter tidak dapat didownload sebagai Excel.
+                                    Gunakan download TXT sebagai alternatif.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" id="generateBtn"
+                        class="flex-1 bg-gray-400 cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                        disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span>Generate Emails</span>
+                    </button>
+
+                    <button type="button" id="downloadBtn"
+                        class="flex-1 bg-white border border-halal-green text-halal-green hover:bg-halal-green hover:text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                        style="display: none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        <span>Download TXT</span>
+                    </button>
+
+                    <button type="button" id="downloadExcelBtn"
+                        class="flex-1 bg-white border border-halal-green text-halal-green hover:bg-halal-green hover:text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                        style="display: none;" disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        <span>Download Excel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="bg-white rounded-xl shadow-lg border border-gray-200 p-8" style="display: none;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Hasil:</h3>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">Total:</span>
+                    <span id="totalCount"
+                        class="bg-halal-green text-white px-3 py-1 rounded-full text-sm font-medium">0</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <p class="text-sm text-gray-600 mb-2">Email Asli:</p>
+                <p id="originalEmail" class="font-mono text-halal-green font-medium"></p>
+            </div>
+
+            <!-- Too Many Results Message -->
+            <div id="tooManyResults" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-4"
+                style="display: none;">
+                <div class="text-center">
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold text-blue-800 mb-2">Output Terlalu Banyak</h4>
+                    <p class="text-blue-700 mb-4">
+                        Jumlah kombinasi terlalu besar untuk ditampilkan di browser.
+                        Silakan download hasilnya dalam format TXT atau Excel.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button id="downloadBtnLarge"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            <span>Download TXT</span>
+                        </button>
+                        <button id="downloadExcelBtnLarge"
+                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                            disabled>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            <span>Download Excel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2 max-h-96 overflow-y-auto">
+                <div id="emailList" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center py-8" style="display: none;">
+            <div class="inline-flex items-center space-x-2">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-halal-green"></div>
+                <span class="text-gray-600">Generating email addresses...</span>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8" style="display: none;">
+            <div class="flex items-center space-x-2">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span id="errorMessage" class="text-red-800"></span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <div class="w-12 h-12 flex items-center justify-center bg-white rounded-lg">
+                        <img src="./static/logo_client.png" alt="HALAL CENTER AL-FALAH"
+                            class="w-10 h-10 object-contain">
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">HALAL CENTER AL-FALAH</span>
+                </div>
+                <p class="text-sm text-gray-500">
+                    2025 - Static Version (No Server Required)
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentEmails = [];
+        let originalEmail = '';
+        let calculationTimeout = null;
+
+        // ========================================
+        // CORE LOGIC - Ported from Python main.py
+        // ========================================
+
+        /**
+         * Generate email variations with dots in username
+         * Port of Python generate_dotted_emails() function
+         */
+        function generateEmails(email) {
+            if (!email || !email.includes('@')) {
+                return [];
+            }
+
+            const [username, domain] = email.split('@');
+
+            // Check if username is too long (max 21 characters)
+            if (username.length > 21) {
+                return [];
+            }
+
+            const results = [email]; // Start with original email
+            const n = username.length;
+
+            if (n <= 1) {
+                return results; // No dots possible for single character
+            }
+
+            // For n characters, we have n-1 possible positions for dots
+            // Each position can have a dot (1) or no dot (0)
+            const limit = Math.pow(2, n - 1);
+
+            for (let i = 1; i < limit; i++) {
+                let newUsername = '';
+                // Get binary representation for dot positions (padded)
+                const binary = i.toString(2).padStart(n - 1, '0');
+
+                // Build username with dots only between characters
+                for (let j = 0; j < n; j++) {
+                    newUsername += username[j];
+                    // Add dot after current character if binary bit is 1 and not the last character
+                    if (j < n - 1 && binary[j] === '1') {
+                        newUsername += '.';
+                    }
+                }
+
+                results.push(newUsername + '@' + domain);
+            }
+
+            return sortEmailsByDots(results);
+        }
+
+        /**
+         * Sort emails by the number of dots and their positions
+         * Port of Python sort_emails_by_dots() function
+         */
+        function sortEmailsByDots(emails) {
+            return emails.sort((a, b) => {
+                const usernameA = a.split('@')[0];
+                const usernameB = b.split('@')[0];
+
+                const dotCountA = (usernameA.match(/\./g) || []).length;
+                const dotCountB = (usernameB.match(/\./g) || []).length;
+
+                // First sort by dot count
+                if (dotCountA !== dotCountB) {
+                    return dotCountA - dotCountB;
+                }
+
+                // If same dot count, sort by position of first dot
+                const firstDotA = usernameA.indexOf('.');
+                const firstDotB = usernameB.indexOf('.');
+
+                return firstDotA - firstDotB;
+            });
+        }
+
+        // ========================================
+        // CLIENT-SIDE FILE DOWNLOAD
+        // ========================================
+
+        /**
+         * Download emails as TXT file using Blob
+         */
+        function downloadTxt(emails, emailAddress) {
+            const content = emails.join('\n');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            // Extract username safely with fallback
+            const username = (emailAddress && emailAddress.includes('@'))
+                ? emailAddress.split('@')[0]
+                : 'emails';
+            const filename = 'dummy_emails_' + username + '.txt';
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+
+            // Cleanup with small delay to ensure download starts
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+        }
+
+        /**
+         * Download emails as Excel file using SheetJS
+         */
+        function downloadExcel(emails, emailAddress) {
+            // Create worksheet data with header
+            const wsData = [['Email Address']];
+            emails.forEach(email => {
+                wsData.push([email]);
+            });
+
+            // Create worksheet and workbook
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Set column width
+            ws['!cols'] = [{ wch: 40 }];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Dummy Emails');
+
+            // Extract username safely with fallback
+            const username = (emailAddress && emailAddress.includes('@'))
+                ? emailAddress.split('@')[0]
+                : 'emails';
+            const filename = 'dummy_emails_' + username + '.xlsx';
+
+            // Download file
+            XLSX.writeFile(wb, filename);
+        }
+
+        // ========================================
+        // UI HELPER FUNCTIONS
+        // ========================================
+
+        function calculateCombinationsClientSide(email) {
+            if (!email || !email.includes('@')) {
+                return { total_combinations: 0, username_length: 0 };
+            }
+
+            const username = email.split('@')[0];
+            const usernameLength = username.length;
+
+            if (usernameLength > 21) {
+                return { total_combinations: -1, username_length: usernameLength };
+            }
+
+            if (usernameLength <= 1) {
+                return { total_combinations: 1, username_length: usernameLength };
+            }
+
+            const totalCombinations = Math.pow(2, usernameLength - 1);
+            return { total_combinations: totalCombinations, username_length: usernameLength };
+        }
+
+        function isValidEmail(email) {
+            if (!email || typeof email !== 'string') return false;
+
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailRegex.test(email)) return false;
+
+            const username = email.split('@')[0];
+            if (username.length > 21) return false;
+
+            const domain = email.split('@')[1];
+            if (!domain || !domain.includes('.') || domain.split('.').length < 2) return false;
+
+            const tld = domain.split('.').pop();
+            if (!tld || tld.length < 2) return false;
+
+            return true;
+        }
+
+        function updateGenerateButton(email) {
+            const generateBtn = document.getElementById('generateBtn');
+            const isValid = isValidEmail(email);
+
+            if (isValid) {
+                generateBtn.disabled = false;
+                generateBtn.className = 'flex-1 bg-halal-green hover:bg-halal-dark text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2';
+            } else {
+                generateBtn.disabled = true;
+                generateBtn.className = 'flex-1 bg-gray-400 cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2';
+            }
+        }
+
+        function updateExcelButtonState(usernameLength) {
+            const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+            const downloadExcelBtnLarge = document.getElementById('downloadExcelBtnLarge');
+
+            const canDownloadExcel = usernameLength <= 20;
+
+            if (downloadExcelBtn) {
+                if (canDownloadExcel) {
+                    downloadExcelBtn.disabled = false;
+                    downloadExcelBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    downloadExcelBtn.classList.add('hover:bg-halal-green', 'hover:text-white');
+                } else {
+                    downloadExcelBtn.disabled = true;
+                    downloadExcelBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    downloadExcelBtn.classList.remove('hover:bg-halal-green', 'hover:text-white');
+                }
+            }
+
+            if (downloadExcelBtnLarge) {
+                if (canDownloadExcel) {
+                    downloadExcelBtnLarge.disabled = false;
+                    downloadExcelBtnLarge.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    downloadExcelBtnLarge.disabled = true;
+                    downloadExcelBtnLarge.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        }
+
+        function showButtonLoading(button) {
+            button.disabled = true;
+            button.dataset.originalHtml = button.innerHTML;
+            button.innerHTML = `
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <span>Loading...</span>
+            `;
+        }
+
+        function restoreButtonState(button) {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalHtml;
+        }
+
+        function calculateCombinationsRealtime(email) {
+            updateGenerateButton(email);
+
+            if (!email || !email.includes('@')) {
+                document.getElementById('realtimeCalculation').style.display = 'none';
+                document.getElementById('largeCombinationWarning').style.display = 'none';
+                document.getElementById('tooLongWarning').style.display = 'none';
+                document.getElementById('excelLimitWarning').style.display = 'none';
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                document.getElementById('realtimeCalculation').style.display = 'none';
+                document.getElementById('largeCombinationWarning').style.display = 'none';
+                document.getElementById('tooLongWarning').style.display = 'none';
+                document.getElementById('excelLimitWarning').style.display = 'none';
+                return;
+            }
+
+            const result = calculateCombinationsClientSide(email);
+
+            if (result.username_length > 21) {
+                document.getElementById('realtimeCalculation').style.display = 'none';
+                document.getElementById('largeCombinationWarning').style.display = 'none';
+                document.getElementById('tooLongWarning').style.display = 'block';
+                document.getElementById('excelLimitWarning').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('combinationCount').textContent = result.total_combinations.toLocaleString();
+            document.getElementById('largeCombinationWarning').style.display = (result.username_length > 15) ? 'block' : 'none';
+            document.getElementById('excelLimitWarning').style.display = (result.username_length > 20) ? 'block' : 'none';
+
+            updateExcelButtonState(result.username_length);
+
+            document.getElementById('realtimeCalculation').style.display = 'block';
+            document.getElementById('tooLongWarning').style.display = 'none';
+        }
+
+        function displayResults(emails, email) {
+            document.getElementById('originalEmail').textContent = email;
+            document.getElementById('totalCount').textContent = emails.length.toLocaleString();
+
+            const emailList = document.getElementById('emailList');
+            emailList.innerHTML = '';
+
+            emails.forEach((emailItem, index) => {
+                const emailDiv = document.createElement('div');
+                emailDiv.className = 'bg-white border border-gray-200 rounded-lg p-3 fade-in';
+                emailDiv.style.animationDelay = `${Math.min(index * 20, 500)}ms`;
+                emailDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3 flex-1">
+                            <span class="font-mono text-sm text-gray-900">${emailItem}</span>
+                            <span class="text-xs text-gray-500">#${index + 1}</span>
+                        </div>
+                        <button 
+                            onclick="copyEmail('${emailItem}', this)"
+                            class="copy-btn bg-gray-100 hover:bg-halal-green hover:text-white text-gray-600 px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200 flex items-center space-x-1"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                `;
+                emailList.appendChild(emailDiv);
+            });
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function copyEmail(email, button) {
+            navigator.clipboard.writeText(email).then(function () {
+                const originalText = button.innerHTML;
+                button.innerHTML = `
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Copied!</span>
+                `;
+                button.classList.remove('bg-gray-100', 'hover:bg-halal-green', 'hover:text-white', 'text-gray-600');
+                button.classList.add('bg-green-100', 'text-green-700');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-100', 'text-green-700');
+                    button.classList.add('bg-gray-100', 'hover:bg-halal-green', 'hover:text-white', 'text-gray-600');
+                }, 2000);
+            }).catch(function (err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        // ========================================
+        // EVENT LISTENERS
+        // ========================================
+
+        // Realtime calculation on input
+        document.getElementById('email').addEventListener('input', function (e) {
+            const email = e.target.value.trim();
+
+            updateGenerateButton(email);
+
+            if (calculationTimeout) {
+                clearTimeout(calculationTimeout);
+            }
+
+            calculationTimeout = setTimeout(() => {
+                calculateCombinationsRealtime(email);
+            }, 300);
+        });
+
+        // Form submission - Generate emails
+        document.getElementById('emailForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            if (!email) return;
+
+            if (!isValidEmail(email)) {
+                showError('Format email tidak valid. Gunakan format: username@domain.tld');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('downloadExcelBtn').style.display = 'none';
+            document.getElementById('tooManyResults').style.display = 'none';
+
+            // Use setTimeout to prevent UI blocking for large datasets
+            setTimeout(() => {
+                try {
+                    const checkResult = calculateCombinationsClientSide(email);
+
+                    if (checkResult.total_combinations === -1) {
+                        throw new Error(`Username terlalu panjang (${checkResult.username_length} karakter). Maksimal 21 karakter.`);
+                    }
+
+                    if (checkResult.total_combinations === 0) {
+                        throw new Error('Invalid email format. Email must contain \'@\' symbol.');
+                    }
+
+                    // Generate emails locally
+                    const emails = generateEmails(email);
+                    currentEmails = emails;
+                    originalEmail = email;
+
+                    // Limit display to 1024 combinations
+                    const canDisplay = checkResult.total_combinations <= 1024;
+
+                    if (!canDisplay) {
+                        document.getElementById('originalEmail').textContent = email;
+                        document.getElementById('totalCount').textContent = checkResult.total_combinations.toLocaleString();
+                        document.getElementById('tooManyResults').style.display = 'block';
+                        document.getElementById('emailList').innerHTML = '';
+                        document.getElementById('results').style.display = 'block';
+                        document.getElementById('downloadBtn').style.display = 'none';
+                        document.getElementById('downloadExcelBtn').style.display = 'none';
+                    } else {
+                        displayResults(emails, email);
+                        document.getElementById('downloadBtn').style.display = 'block';
+                        document.getElementById('downloadExcelBtn').style.display = 'block';
+                    }
+
+                    updateExcelButtonState(checkResult.username_length);
+
+                } catch (error) {
+                    showError(error.message);
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }, 50); // Small delay to allow UI to update
+        });
+
+        // Download TXT button
+        document.getElementById('downloadBtn').addEventListener('click', function () {
+            if (!currentEmails.length) return;
+
+            const button = this;
+            showButtonLoading(button);
+
+            setTimeout(() => {
+                downloadTxt(currentEmails, originalEmail);
+                restoreButtonState(button);
+            }, 100);
+        });
+
+        // Download Excel button
+        document.getElementById('downloadExcelBtn').addEventListener('click', function () {
+            if (!currentEmails.length) return;
+
+            const button = this;
+            showButtonLoading(button);
+
+            setTimeout(() => {
+                downloadExcel(currentEmails, originalEmail);
+                restoreButtonState(button);
+            }, 100);
+        });
+
+        // Large result download buttons
+        document.getElementById('downloadBtnLarge').addEventListener('click', function () {
+            if (!originalEmail) return;
+
+            const button = this;
+            showButtonLoading(button);
+
+            setTimeout(() => {
+                // Generate emails if not already done
+                if (!currentEmails.length) {
+                    currentEmails = generateEmails(originalEmail);
+                }
+                downloadTxt(currentEmails, originalEmail);
+                restoreButtonState(button);
+            }, 100);
+        });
+
+        document.getElementById('downloadExcelBtnLarge').addEventListener('click', function () {
+            if (!originalEmail) return;
+
+            const button = this;
+            showButtonLoading(button);
+
+            setTimeout(() => {
+                // Generate emails if not already done
+                if (!currentEmails.length) {
+                    currentEmails = generateEmails(originalEmail);
+                }
+                downloadExcel(currentEmails, originalEmail);
+                restoreButtonState(button);
+            }, 100);
+        });
+
+        // Initialize button state on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const emailInput = document.getElementById('email');
+            updateGenerateButton(emailInput.value);
+        });
+    </script>
+</body>
+
+</html>
